@@ -45,11 +45,11 @@
 
 1. 이미지를 **patch로 나눔**
     - 224x224 이미지를 16x16 블록으로 나눔 -> 총 196개의 patch 생성
-    - 각 patch는 16x16x3 = 768 Demension
+    - 각 patch는 16x16x3 = 768 dimension
 
 2. 각 patch를 **embedding vector로 변환**
     - 각 patch를 flatten하여 하나의 vector로 만듦
-    - 학습 가능한 선형 변환을 통해 Transformer가 이해할 수 있는 고정된 차원 D로 매핑 (718 -> D)
+    - 학습 가능한 선형 변환을 통해 Transformer가 이해할 수 있는 고정된 차원 D로 매핑 (768 -> D)
     - 이 투영 결과를 **patch embedding** 이라고 함
 
 3. patch embedding sequence 앞에 **[CLS] Token을 추가**
@@ -85,3 +85,84 @@
 - 하지만 문제는 Positional Embedding이다. 사전학습 시에는 기존 패치 기준의 위치 임베딩만 학습되어 있는데 고해상도 이미지를 넣으면 패치 수가 달라지기 때문에 기존 위치 임베딩을 그대로 쓸 수 없다.
 - 이를 해결하기 위해 ViT는 위치 임베딩을 2차원 공간 상에서 interpolation 한다.
 - 바로 이 부분이 ViT에 대해 이미지의 2D 구조에 관한 inductive bias가 수동으로 주입되는 유일한 지점이다.
+
+<br>
+<br>
+
+## 4 Experiments
+
+- 아래 데이터셋으로 **사전학습**
+    - **ILSVRC-2012 ImageNet**: 1,000 classes, 1.3M images
+    - **ImageNet-21k**: 21,000 classes, 14M images
+    - **JFT**: 18,000 classes, 303M high-resolution images
+- 벤치마크 데이터셋: ImageNet, ImageNet-ReaL, CIFAR-10, CIFAR-100, Oxford-IIIT Pets, Oxford Flowers-102, VTAB(Natural, Specialized, Structured)
+
+- ViT 구성을 BERT 설정 기반으로 함. Base, Large는 BERT에서 가져오고 Huge는 따로 추가
+
+![Image](https://github.com/user-attachments/assets/48108bc2-a885-469e-ab76-062755fd6a91)
+
+- 성능 비교
+    - ViT (Vision Transformer)
+    - ResNet의 Batch Normalization을 Group Normalization으로 바꾼 모델 (BiT)
+    - 하이브리드 모델
+
+- Training
+    - optimizer: Adam (B_1=0.9, B_2=0.999)
+    - batch: 4096
+    - weight decay: 0.1
+    - 세부사항은 부록에!
+
+- Fine-Tuning
+    - optimizer: SGD with momentum
+    - batch: 512
+    - 세부사항은 부록에!
+
+- Metrics
+    - Fine-Tuning accuracy: 각 모델을 해당 데이터셋에 대해 fine-tuning한 후의 정확도
+    - Few-shot accuracy: frozen된 feature를 사용해, linear probe로 정규화된 최소제곱 회귀 문제를 풀어 계산한 정확도
+    - 주로 Fine-Tuning acc 성능에 초점을 맞추지만, Fine-Tuning 비용이 많이 들면 선형 few-shot acc를 사용해 빠르게 성능 평가
+
+- Results
+    - ![Image](https://github.com/user-attachments/assets/d0aac67b-3333-4009-8485-679c5e3a2e8e)
+    - ViT-L/16은 JFT-300M에서 사전학습했을 때
+        - BiT-L보다 모든 task에서 더 좋은 성능을 보였고 계산량도 훨씬 적음
+    - ViT-H/14는 ImageNet, CIFAR-100, VTAB 같은 어려운 데이터셋에서 우수한 성능을 보임
+    - ImageNet-21k로 사전학습한 ViT도 높은 성능을 보였고 일반 TPU(8 core)에서도 약 30일 내 학습 가능
+    - ViT-H/14는 VTAB의 Natural과 Structured 작업에서 기존 최고 성능(BiT, VIVI, S4L 등)을 능가했으며, Specialized 작업에서는 상위 모델들과 유사한 성능을 보임
+
+### INSPECTING VISION TRANSFORMER
+
+![Image](https://github.com/user-attachments/assets/64c72687-3dc8-460c-908f-7a9ba2421df9)
+
+- patch embedding
+    - ViT의 첫 번째 layer는 flattened image patch를 저차원 공간으로 선형 투영한다.
+    - 위 사진에서 왼쪽 그림은 학습된 embedding 필터의 주성분인데, 이 성분들은 각 patch 내부의 세밀한 구조를 저차원으로 표현하기 위한 가능성 있는 basis functions 처럼 보인다고 한다.
+
+- position embedding
+    - 위 사진에서 가운데 그림은 모델이 이미지 내 distance를 embedding 유사도(similarty)를 통해 인코딩하는 방식을 보여준다. 즉, 더 가까운 패치일수록 더 유사한 position embedding을 갖는다.
+    - 또한, 같은 행이나 열에 있는 patch들은 비슷한 embedding을 갖는 경향이 있고
+    - 그리드가 커질수록 사인파(sinusoidal) 구조가 나타나기도 한다.
+    - 이 결과들은 position embedding이 2D 이미지의 위상(topology)을 학습하게 된다는 것을 의미한다.
+
+- Self-Attention의 거리 특성
+    - Self-attention 덕분에 ViT는 가장 낮은 층에서도 이미지 전체에 걸쳐 정보를 통합할 수 있다.
+    - attention weight를 기반으로 모델이 얼마나 먼 거리까지 정보를 통합하는지에 대한 **평균 거리**(attention distance)를 계산하였고, 이는 CNN에서의 receptive field와 유사한 개념이다.
+    - 결과:
+        - 일부 attention head는 가장 낮은 계층에서도 이미지 전체에 걸쳐 주목(attend)하는데 이는 ViT가 전역 정보 통합 능력을 실제로 활용하고 있다는 것을 보여주는 것이다.
+        - 다른 attention head들은 낮은 층에서 지속적으로 작은 attention 거리만 갖는데, 이런 국소적 attention은 Transformer 앞에 ResNet을 사용하는 하이브리드 모델에서는 덜 두드러지고 이 attention head들이 CNN의 초기 합성곱 층과 유사한 역할을 한다는 것을 시사한다.
+    - 또한 네트워크 깊이가 깊어질수록 attention distance는 증가한다.
+
+
+<br>
+
+## 5 Conclusion
+
+- 기존 컴퓨터 비전 분야의 self-attention 연구들과는 다르게 초기 패치 분할 단계 외에는 이미지 특화된 inductive bias를 도입하지 않았다.
+- 대신 이미지를 patch들의 시퀀스로 해석하고, 이를 표준 Transformer Encoder로 처리한다.
+- 대규모 데이터셋으로 사전학습했을 때 놀라운 성능을 보였고, SOTA와 동등하거나 그 이상을 달성했다.
+- 사전학습 비용이 상대적으로 저렴하다.
+
+### 도전과제
+- ViT를 다른 컴퓨터 비전 과제(object detection, segmentation, ..)에 적용하기
+- 지속적인 self-supervised pre-training 연구
+- Vision Transformer를 더 크게 확장하기
