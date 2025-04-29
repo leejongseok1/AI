@@ -48,7 +48,7 @@
     - 두 확률 분포 또는 점 간의 거리 척도로써 분포의 공분산을 고려해 정규화된 거리를 게산하는 방법
     - 예측된 칼만 상태 (y_i, S_i) (평균위치, 공분산)와
     - 새로운 측정값 d_j 간의 마할라노비스 거리를 정의
-    - ![Image](https://github.com/user-attachments/assets/ec8ae0d9-c852-4c33-ab3f-b1d8b48b8e1a)
+    - $d^{(1)}(i,j) = (d_j - y_i)^T S_i^{-1} (d_j - y_i)$
     - **d_j** : j번째 탐지 결과 (바운딩 박스)
     - **y_i** : i번째 트랙의 칼만 필터 예측 위치
     - **S_i** : i번째 트랙의 예측 공분산 행렬
@@ -80,7 +80,7 @@
 
 - cosine distance
     - 트랙 k와 새로 들어온 탐지 결과 d_j간의 appearance similarity는 가장 가까운 appearance descriptor 쌍을 찾아서 계산함
-    - ![Image](https://github.com/user-attachments/assets/522bd8d6-fbd5-4007-a846-600a17abbef4)
+    - $d^{(2)}(i,j) = \min \left\{ 1 - r_j^T r_k^{(i)} \mid r_k^{(i)} \in R_k \right\}$
     - cosine similarity는 "벡터 방향이 얼마나 비슷한가"를 보는 값이기 때문에 1 - cosine similarity를 취해 거리를 만든다
     - 1 - cosine similarity 값이 작을수록 (cosine similarity가 클수록) 두 객체는 외형적으로 비슷하다고 판단
     - appearance distance d^(2)(i,j)가 THR 이하이면 트랙 i와 탐지 j간의 association을 허용
