@@ -1,6 +1,6 @@
-# Simple Online Realtime Tracking (SORT)
+# Simple Online AND Realtime Tracking (SORT)
 
-- **논문명**: Simple Online Realtime Tracking (SORT)
+- **논문명**: Simple Online AND Realtime Tracking (SORT)
 - **저자**: Alex Bewley, Zongyuan Ge, Lionel Ott, Fabio Ramos, Ben Upcroft
 - **링크**: [arXiv](https://arxiv.org/pdf/1602.00763)
 
