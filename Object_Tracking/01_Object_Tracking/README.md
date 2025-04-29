@@ -45,3 +45,68 @@
     - 공항, 지하철 등 군중 모니터링
     - 자율주행 (차량, 보행자 추적)
     - 매장 내 사람들의 움직임 추적
+
+<br>
+<br>
+
+## MOT Metrics
+
+### MOTA (Multi-Object Tracking Accuracy)
+
+- 여러 오류를 합쳐 Tracking 정확도를 평가하는 지표
+
+<br>
+
+$$
+\text{MOTA} = 1 - \frac{\text{FN} + \text{FP} + \text{IDSW}}{\text{GT}}
+$$
+
+- **FN** (False Negative): 놓친 객체 수
+- **FP** (False Positive): 잘못 탐지한 객체 수
+- **IDSW** (ID switch): ID가 바뀐 횟수
+- **GT** (Ground Truth): 전체 정답 객체 수
+
+<br>
+
+- 종합적인 오류를 쉬운 하나로 표현해 한눈에 직관적으로 Tracking 성능을 볼 수 있다.
+- Detection 영향에 너무 민감해 Tracking 알고리즘 자체의 성능을 분리해서 보기는 어렵다.
+- IDSW를 그냥 오류 하나로만 더하기 때문에 ID를 얼마나 꾸준히 유지했는지를 정교하게 평가하지 못한다.
+
+<br>
+
+### IDF1
+
+- Tracking 중 객체의 ID를 얼마나 일관성 있게 유지했는가 를 평가하는 지표
+- F1 Score처럼 Precision과 Recall의 조화평균을 냄냄
+
+<br>
+
+$$
+\text{IDF1} = 2 \times \frac{\text{ID Precision} \times \text{ID Recall}}{\text{ID Precision} + \text{ID Recall}}
+$$
+
+- ID Precision = 맞게 ID 부여한 수 / 부여한 전체 ID 수
+- ID Recall = 맞게 ID 부여한 수 / 실제 GT ID 수
+
+<br>
+
+- ID 일관성을 정확하게 평가함
+- 소수의 Detection miss나 FP에는 robust 함.
+- Detection이 심각하게 무너지면 IDF1도 같이 하락함
+
+<br>
+
+### MT / ML (Mostly Tracked / Mostly Lost)
+
+- 
+
+
+<br>
+
+### FAF (False Alarms per Frame)
+
+- 프레임당 평균적으로 얼마나 많은 False Positive가 발생했는지를 측정하는 지표
+
+### MOTP
+
+- 
