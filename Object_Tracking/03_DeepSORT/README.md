@@ -48,6 +48,7 @@
     - 두 확률 분포 또는 점 간의 거리 척도로써 분포의 공분산을 고려해 정규화된 거리를 게산하는 방법
     - 예측된 칼만 상태 (y_i, S_i) (평균위치, 공분산)와
     - 새로운 측정값 d_j 간의 마할라노비스 거리를 정의
+
         $$ (^{(1)}(i,j) = (d_j - y_i)^T S_i^{-1} (d_j - y_i)) $$
 
     - **d_j** : j번째 탐지 결과 (바운딩 박스)
@@ -81,6 +82,7 @@
 
 - cosine distance
     - 트랙 k와 새로 들어온 탐지 결과 d_j간의 appearance similarity는 가장 가까운 appearance descriptor 쌍을 찾아서 계산함
+    
         $$ d^{(2)}(i,j) = \min \left\{ 1 - r_j^T r_k^{(i)} \mid r_k^{(i)} \in R_k \right\} $$
 
     - cosine similarity는 "벡터 방향이 얼마나 비슷한가"를 보는 값이기 때문에 1 - cosine similarity를 취해 거리를 만든다
