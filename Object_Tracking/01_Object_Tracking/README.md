@@ -77,7 +77,7 @@ $$
 ### IDF1
 
 - Tracking 중 객체의 ID를 얼마나 일관성 있게 유지했는가 를 평가하는 지표
-- F1 Score처럼 Precision과 Recall의 조화평균을 냄냄
+- F1 Score처럼 Precision과 Recall의 조화평균을 냄
 
 <br>
 
