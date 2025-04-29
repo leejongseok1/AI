@@ -80,7 +80,7 @@
 
 - cosine distance
     - 트랙 k와 새로 들어온 탐지 결과 d_j간의 appearance similarity는 가장 가까운 appearance descriptor 쌍을 찾아서 계산함
-    - $d^{(2)}(i,j) = \min \left\{ 1 - r_j^T r_k^{(i)} \mid r_k^{(i)} \in R_k \right\}$
+    - $d^{(2)}(i,j) = \min \left\\{ 1 - r_j^T r_k^{(i)} \mid r_k^{(i)} \in R_k \right\\}$
     - cosine similarity는 "벡터 방향이 얼마나 비슷한가"를 보는 값이기 때문에 1 - cosine similarity를 취해 거리를 만든다
     - 1 - cosine similarity 값이 작을수록 (cosine similarity가 클수록) 두 객체는 외형적으로 비슷하다고 판단
     - appearance distance d^(2)(i,j)가 THR 이하이면 트랙 i와 탐지 j간의 association을 허용
